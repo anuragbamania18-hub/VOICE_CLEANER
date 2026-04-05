@@ -4,7 +4,7 @@ import numpy as np
 import soundfile as sf
 import io
 
-# --- 🎨 CUSTOM STYLING (CSS) ---
+# --- (CSS) ---
 def style_app():
     st.markdown("""
         <style>
@@ -71,7 +71,7 @@ def style_app():
         </style>
     """, unsafe_allow_html=True)
 
-# --- ⚙️ PROCESSING LOGIC ---
+# --- PROCESSING LOGIC ---
 def process_audio(input_audio):
     y, sr = librosa.load(input_audio, sr=None)
     stft = librosa.stft(y)
@@ -88,7 +88,7 @@ def process_audio(input_audio):
     buffer.seek(0)
     return buffer
 
-# --- 🚀 APP LAYOUT ---
+# --- APP LAYOUT ---
 st.set_page_config(page_title="SonicClean AI", page_icon="🌊", layout="centered")
 style_app()
 
