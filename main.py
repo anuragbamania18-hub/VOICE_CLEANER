@@ -89,7 +89,7 @@ def process_audio(input_audio):
     return buffer
 
 # --- APP LAYOUT ---
-st.set_page_config(page_title="SonicClean AI", page_icon="🌊", layout="centered")
+st.set_page_config(page_title="NOICE", page_icon="🌊", layout="centered")
 style_app()
 
 st.markdown('<h1 class="main-header">NOISE REDUCER</h1>', unsafe_allow_html=True)
