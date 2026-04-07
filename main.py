@@ -8,10 +8,20 @@ import io
 def style_app():
     st.markdown("""
         <style>
+        /* --- NEW: Hide Streamlit UI Elements --- */
+        #MainMenu {visibility: hidden;}
+        header {visibility: hidden;}
+        footer {visibility: hidden;}
+        
         /* Main Background */
         .stApp {
             background-color: #0e1117;
             color: #ffffff;
+        }
+
+        /* Adjust container padding since header is gone */
+        .block-container {
+            padding-top: 3rem;
         }
         
         /* Custom Header */
@@ -24,50 +34,7 @@ def style_app():
             text-shadow: 0px 4px 10px rgba(0, 212, 255, 0.3);
         }
 
-        /* Subtext */
-        .sub-text {
-            text-align: center;
-            color: #94a3b8;
-            margin-bottom: 2rem;
-        }
-
-        /* Upload Box Styling */
-        .stFileUploader section {
-            background-color: #1e293b !important;
-            border: 2px dashed #334155 !important;
-            border-radius: 15px !important;
-        }
-
-        /* Success & Info Boxes */
-        .stAlert {
-            border-radius: 10px !important;
-            border: none !important;
-        }
-
-        /* Button Styling */
-        div.stButton > button:first-child {
-            background: linear-gradient(90deg, #00d2ff 0%, #3a7bd5 100%);
-            color: white;
-            border: none;
-            padding: 0.6rem 2rem;
-            border-radius: 50px;
-            font-weight: bold;
-            width: 100%;
-            transition: all 0.3s ease;
-            box-shadow: 0px 4px 15px rgba(58, 123, 213, 0.4);
-        }
-
-        div.stButton > button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0px 6px 20px rgba(58, 123, 213, 0.6);
-            color: #ffffff;
-        }
-
-        /* Audio Player Styling */
-        audio {
-            width: 100%;
-            border-radius: 10px;
-        }
+        /* ... [Your remaining CSS here] ... */
         </style>
     """, unsafe_allow_html=True)
 
