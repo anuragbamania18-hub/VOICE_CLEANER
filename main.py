@@ -4,7 +4,7 @@ import numpy as np
 import soundfile as sf
 import io
 
-# --- (CSS) ---
+# --- CUSTOM STYLING (CSS) ---
 def style_app():
     st.markdown("""
         <style>
@@ -92,7 +92,7 @@ def process_audio(input_audio):
 st.set_page_config(page_title="NOICE", page_icon="✨", layout="centered")
 style_app()
 
-st.markdown('<h1 class="main-header">NOISE REDUCER</h1>', unsafe_allow_html=True)
+st.markdown('<h1 class="main-header"> NOISE REDUCE </h1>', unsafe_allow_html=True)
 st.markdown('<p class="sub-text">Professional Grade Fourier-Transform Noise Reduction</p>', unsafe_allow_html=True)
 
 # Layout Columns
