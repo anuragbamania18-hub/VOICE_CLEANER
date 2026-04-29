@@ -66,23 +66,48 @@ def style_app():
         </style>
     """, unsafe_allow_html=True)
 
-# --- PROCESSING LOGIC ---
 def process_audio(input_audio):
     y, sr = librosa.load(input_audio, sr=None)
-    stft = librosa.stft(y)
+    
+    # 1. Pre-emphasis: Boosts high frequencies (where speech clarity lives)
+    y_filt = librosa.effects.preemphasis(y)
+    
+    stft = librosa.stft(y_filt, n_fft=2048, hop_length=512)
     magnitude, phase = librosa.magphase(stft)
+    power = magnitude**2
 
-    # Rolling window adaptive noise estimation
-    noise_est = scipy.ndimage.minimum_filter(magnitude, size=(1, 43))
-    noise_est = scipy.ndimage.gaussian_filter(noise_est, sigma=(0, 2))
+    # 2. Adaptive Noise Estimation (Median of the power spectrum)
+    # This identifies the constant 'wind' energy
+    noise_est = np.median(power, axis=1, keepdims=True)
 
-    # Subtraction with Gain Floor
-    clean_mag = np.maximum(magnitude - (noise_est * 1.5), 0.15 * magnitude)
+    # 3. WIENER FILTER CALCULATION
+    # SNR = (Signal Power / Noise Power)
+    # Gain = SNR / (SNR + 1)
+    # This is a 'soft' transition that sounds much more natural
+    snr = power / (noise_est + 1e-10) # 1e-10 prevents division by zero
+    
+    # We apply a 'strength' factor to the noise to be more aggressive
+    alpha = 3.0 
+    gain = snr / (snr + alpha)
+    
+    # 4. Smoothing the Gain Mask
+    # This is the "something extra" that prevents the choppy sound
+    gain = scipy.ndimage.gaussian_filter(gain, sigma=(1, 2))
 
-    y_clean = librosa.istft(clean_mag * phase)
+    # Apply gain and convert back to magnitude
+    clean_mag = np.sqrt(power * gain)
+
+    # 5. Reconstruction
+    y_clean = librosa.istft(clean_mag * phase, hop_length=512)
+    
+    # Final 'naturalness' blend: Mix 10% of the original back in 
+    # to avoid that "empty space" feeling.
+    y_final = (0.9 * y_clean) + (0.1 * y[:len(y_clean)])
+    
+    y_final = librosa.util.normalize(y_final)
 
     buffer = io.BytesIO()
-    sf.write(buffer, y_clean, sr, format='WAV')
+    sf.write(buffer, y_final, sr, format='WAV')
     buffer.seek(0)
     return buffer
 
