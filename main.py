@@ -103,13 +103,13 @@ uploaded_file = st.file_uploader("", type=["wav", "mp3"], label_visibility="coll
 
 if uploaded_file is not None:
     st.audio(uploaded_file)
-    if st.button("🚀 CLEAN AUDIO NOW"):
+    if st.button(" CLEAN AUDIO NOW"):
         with st.spinner("Processing..."):
             processed_data = process_audio(uploaded_file)
             st.success("✨ Success!")
             st.audio(processed_data)
             st.download_button(
-                label="📥 DOWNLOAD CLEANED WAV",
+                label=" 😉 DOWNLOAD CLEANED WAV",
                 data=processed_data,
                 file_name="noice_cleaned_audio.wav",
                 mime="audio/wav"
