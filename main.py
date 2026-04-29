@@ -9,46 +9,35 @@ import scipy.ndimage  # Required for the rolling window math
 def style_app():
     st.markdown("""
         <style>
-        #MainMenu {visibility: hidden;}
-        header {visibility: hidden;}
-        footer {visibility: hidden;}
-        
-        .stApp {
-            background-color: #0e1117;
-            color: #ffffff;
-        }
-
-        .block-container {
-            padding-top: 3rem;
-        }
+        /* ... (previous styles) ... */
         
         .main-header {
-            font-size: 2.5rem;
+            font-size: 3rem;
             font-weight: 800;
-            color: #00d4ff;
+            color: #ffffff; /* Default color for 'SE REDU' */
             text-align: center;
             margin-bottom: 0.5rem;
-            text-shadow: 0px 4px 10px rgba(0, 212, 255, 0.3);
         }
 
-        .sub-text {
-            text-align: center;
-            color: #94a3b8;
-            margin-bottom: 2rem;
+        /* The 'NOI' and 'CE' Golden Effect */
+        .golden-text {
+            color: #FFD700;
+            text-shadow: 0px 0px 15px rgba(255, 215, 0, 0.6);
         }
-
-        div.stButton > button:first-child {
-            background: linear-gradient(90deg, #00d2ff 0%, #3a7bd5 100%);
-            color: white;
-            border: none;
-            padding: 0.6rem 2rem;
-            border-radius: 50px;
-            font-weight: bold;
-            width: 100%;
-            transition: all 0.3s ease;
-        }
+        
+        /* ... (rest of your styles) ... */
         </style>
     """, unsafe_allow_html=True)
+
+# --- APP LAYOUT ---
+style_app()
+
+# Updated Header Logic
+st.markdown("""
+    <h1 class="main-header">
+        <span class="golden-text">NOI</span>SE REDU<span class="golden-text">CE</span>
+    </h1>
+""", unsafe_allow_html=True)
 
 # --- ADVANCED PROCESSING LOGIC ---
 def process_audio(input_audio):
