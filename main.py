@@ -65,46 +65,41 @@ def style_app():
         }
         </style>
     """, unsafe_allow_html=True)
-
+# ----PROCESSING LOGIC----
 def process_audio(input_audio):
     y, sr = librosa.load(input_audio, sr=None)
     
-    # 1. Pre-emphasis: Boosts high frequencies (where speech clarity lives)
-    y_filt = librosa.effects.preemphasis(y)
+    # 1. High-pass filter: Wind is mostly sub-100Hz rumble. 
+    # Let's kill that first.
+    y = librosa.effects.preemphasis(y)
     
-    stft = librosa.stft(y_filt, n_fft=2048, hop_length=512)
+    stft = librosa.stft(y, n_fft=2048, hop_length=512)
     magnitude, phase = librosa.magphase(stft)
-    power = magnitude**2
 
-    # 2. Adaptive Noise Estimation (Median of the power spectrum)
-    # This identifies the constant 'wind' energy
-    noise_est = np.median(power, axis=1, keepdims=True)
+    # 2. MORPHOLOGICAL FILTERING
+    # This is the "secret sauce." 
+    # Wind is a "cloud" in the spectrogram. Speech is "lines."
+    # We use a median filter across the frequency axis to find the "cloud" (noise).
+    # Then we subtract it.
+    
+    # Estimate the "cloud" (noise) by blurring across frequencies
+    noise_floor = scipy.ndimage.median_filter(magnitude, size=(20, 1)) 
+    
+    # 3. ADVANCED SUBTRACTION
+    # We use a high over-subtraction (4.0) because that wind is brutal.
+    clean_mag = np.maximum(magnitude - (noise_floor * 4.0), 0.05 * magnitude)
 
-    # 3. WIENER FILTER CALCULATION
-    # SNR = (Signal Power / Noise Power)
-    # Gain = SNR / (SNR + 1)
-    # This is a 'soft' transition that sounds much more natural
-    snr = power / (noise_est + 1e-10) # 1e-10 prevents division by zero
+    # 4. HARMONIC ENHANCEMENT
+    # We use Librosa's decompose to separate percussive (wind hits) 
+    # from harmonic (vocals). We prioritize the harmonics.
+    harmonic, percussive = librosa.decompose.hpss(clean_mag)
     
-    # We apply a 'strength' factor to the noise to be more aggressive
-    alpha = 3.0 
-    gain = snr / (snr + alpha)
-    
-    # 4. Smoothing the Gain Mask
-    # This is the "something extra" that prevents the choppy sound
-    gain = scipy.ndimage.gaussian_filter(gain, sigma=(1, 2))
+    # Final Result is mostly Harmonic + a tiny bit of Percussive for naturalness
+    final_mag = harmonic + (0.1 * percussive)
 
-    # Apply gain and convert back to magnitude
-    clean_mag = np.sqrt(power * gain)
-
-    # 5. Reconstruction
-    y_clean = librosa.istft(clean_mag * phase, hop_length=512)
-    
-    # Final 'naturalness' blend: Mix 10% of the original back in 
-    # to avoid that "empty space" feeling.
-    y_final = (0.9 * y_clean) + (0.1 * y[:len(y_clean)])
-    
-    y_final = librosa.util.normalize(y_final)
+    # 5. RECONSTRUCT
+    y_clean = librosa.istft(final_mag * phase, hop_length=512)
+    y_final = librosa.util.normalize(y_clean)
 
     buffer = io.BytesIO()
     sf.write(buffer, y_final, sr, format='WAV')
