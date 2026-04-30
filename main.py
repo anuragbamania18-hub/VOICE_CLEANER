@@ -3,64 +3,139 @@ import librosa
 import numpy as np
 import soundfile as sf
 import io
-import noisereduce as nr  # The specialized library
 
 # --- CUSTOM STYLING (CSS) ---
 def style_app():
-    st.markdown("""
-        <style>
-        #MainMenu {visibility: hidden;}
-        header {visibility: hidden;}
-        footer {visibility: hidden;}
-        .stApp { background-color: #0e1117; color: #ffffff; }
-        .block-container { padding-top: 5rem; max-width: 700px; }
-        .main-header { font-size: 3.5rem; font-weight: 800; text-align: center; margin-bottom: 0px; }
-        .golden-text { color: #FFD700; text-shadow: 0px 0px 20px rgba(255, 215, 0, 0.5); }
-        .format-label { text-align: center; color: #94a3b8; font-size: 0.9rem; margin-bottom: 2rem; }
-        div.stButton > button:first-child {
-            background: linear-gradient(90deg, #00d2ff 0%, #3a7bd5 100%);
-            color: white; border: none; padding: 0.8rem; border-radius: 10px; width: 100%;
-        }
-        </style>
-    """, unsafe_allow_html=True)
+    st.markdown("""
+        <style>
+        /* --- NEW: Hide Streamlit UI Elements --- */
+        #MainMenu {visibility: hidden;}
+        header {visibility: hidden;}
+        footer {visibility: hidden;}
+        
+        /* Main Background */
+        .stApp {
+            background-color: #0e1117;
+            color: #ffffff;
+        }
 
-# --- LIBRARY-BASED PROCESSING LOGIC ---
+        /* Adjust container padding since header is gone */
+        .block-container {
+            padding-top: 3rem;
+        }
+        
+        /* Custom Header */
+        .main-header {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #00d4ff;
+            text-align: center;
+            margin-bottom: 0.5rem;
+            text-shadow: 0px 4px 10px rgba(0, 212, 255, 0.3);
+        }
+
+        /* Subtext */
+        .sub-text {
+            text-align: center;
+            color: #94a3b8;
+            margin-bottom: 2rem;
+        }
+
+        /* Upload Box Styling */
+        .stFileUploader section {
+            background-color: #1e293b !important;
+            border: 2px dashed #334155 !important;
+            border-radius: 15px !important;
+        }
+
+        /* Success & Info Boxes */
+        .stAlert {
+            border-radius: 10px !important;
+            border: none !important;
+        }
+
+        /* Button Styling */
+        div.stButton > button:first-child {
+            background: linear-gradient(90deg, #00d2ff 0%, #3a7bd5 100%);
+            color: white;
+            border: none;
+            padding: 0.6rem 2rem;
+            border-radius: 50px;
+            font-weight: bold;
+            width: 100%;
+            transition: all 0.3s ease;
+            box-shadow: 0px 4px 15px rgba(58, 123, 213, 0.4);
+        }
+
+        div.stButton > button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0px 6px 20px rgba(58, 123, 213, 0.6);
+            color: #ffffff;
+        }
+
+        /* Audio Player Styling */
+        audio {
+            width: 100%;
+            border-radius: 10px;
+        }
+        /* ... [Your remaining CSS here] ... */
+        </style>
+    """, unsafe_allow_html=True)
+
+# --- PROCESSING LOGIC ---
 def process_audio(input_audio):
-    # 1. Load Audio
-    y, sr = librosa.load(input_audio, sr=None)
-    
-    # 2. Apply Noisereduce Library
-    # stationary=False: Better for wind/moving noise
-    # prop_decrease=1.0: How much noise to remove (1.0 = 100%)
-    y_clean = nr.reduce_noise(y=y, sr=sr, stationary=False, prop_decrease=1.0)
-    
-    # 3. Final Normalization
-    y_final = librosa.util.normalize(y_clean)
+    y, sr = librosa.load(input_audio, sr=None)
+    stft = librosa.stft(y)
+    magnitude, phase = librosa.magphase(stft)
 
-    buffer = io.BytesIO()
-    sf.write(buffer, y_final, sr, format='WAV')
-    buffer.seek(0)
-    return buffer
+    # Baseline noise reduction (efficient matrix subtraction)
+    noise_floor = np.mean(magnitude[:, :15], axis=1, keepdims=True)
+    clean_mag = np.maximum(magnitude - (noise_floor * 1.5), 0)
+
+    y_clean = librosa.istft(clean_mag * phase)
+
+    buffer = io.BytesIO()
+    sf.write(buffer, y_clean, sr, format='WAV')
+    buffer.seek(0)
+    return buffer
 
 # --- APP LAYOUT ---
 st.set_page_config(page_title="NOICE", page_icon="✨", layout="centered")
 style_app()
 
-st.markdown("""
-    <div class="main-header">
-        <span class="golden-text">NOI</span>SE REDU<span class="golden-text">CE</span>
-    </div>
-    <p class="format-label">Powered by Spectral Gating (.WAV, .MP3)</p>
-""", unsafe_allow_html=True)
+st.markdown('<h1 class="main-header"> NOISE REDUCE </h1>', unsafe_allow_html=True)
+st.markdown('<p class="sub-text">Professional Grade Fourier-Transform Noise Reduction</p>', unsafe_allow_html=True)
 
-uploaded_file = st.file_uploader("", type=["wav", "mp3"], label_visibility="collapsed")
+# Layout Columns
+col1, col2 = st.columns([1, 1])
+
+with st.container():
+    uploaded_file = st.file_uploader("", type=["wav", "mp3"])
 
 if uploaded_file is not None:
-    st.audio(uploaded_file)
-    if st.button("🚀 CLEAN AUDIO NOW"):
-        with st.spinner("Executing advanced spectral gating..."):
-            processed_data = process_audio(uploaded_file)
-            st.success("✨ Processed Successfully!")
-            st.audio(processed_data)
+    st.info("🎵 File Loaded Successfully")
+    st.audio(uploaded_file)
+
+    if st.button("🚀 CLEAN AUDIO NOW"):
+        with st.spinner("Analyzing spectral baseline and filtering..."):
+            processed_data = process_audio(uploaded_file)
+
+            st.success("✨ Audio Restored!")
+
+            # Display Result
+            st.markdown("### 🎧 Result")
+            st.audio(processed_data)
+
+            # Download Button
+            st.download_button(
+                label="📥 DOWNLOAD CLEANED WAV",
+                data=processed_data,
+                file_name="sonic_clean_output.wav",
+                mime="audio/wav"
+            )
+
+st.markdown("---")
+st.caption("Tip: For best results, ensure the first 0.5s of the audio contains only background noise.")
+
             st.download_button(label="📥 DOWNLOAD CLEANED WAV", data=processed_data, 
                                file_name="noice_pro_clean.wav", mime="audio/wav")
