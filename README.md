@@ -20,7 +20,7 @@ Built with **spectral subtraction** on the Short-Time Fourier Transform.
 ---
 
 
-## 🎯 What it does
+## What it does
 
 Recordings often carry steady background noise such as fan hum, hiss or room tone. This app removes it using ideas straight from Signals & Systems:
 
@@ -42,7 +42,7 @@ Everything runs in a clean dark-themed Streamlit interface: upload, preview, pro
 
 ---
 
-## 🧠 How it works
+## How it works
 
 The signal processing pipeline lives in `process_audio()`:
 
@@ -106,7 +106,7 @@ The cleaned spectrogram reuses the noisy phase $\angle X(t, f)$, and the inverse
 
 ---
 
-## 🚀 Getting started
+## Getting started
 
 ### Prerequisites
 
@@ -139,7 +139,7 @@ Then open the local URL Streamlit prints (usually http://localhost:8501).
 
 ---
 
-## 🕹️ Usage
+## Usage
 
 1. **Upload** a `.wav` or `.mp3` file.
 2. **Listen** to the original using the preview player.
@@ -147,11 +147,11 @@ Then open the local URL Streamlit prints (usually http://localhost:8501).
 4. **Compare** the cleaned audio in the result player.
 5. Click **📥 DOWNLOAD CLEANED WAV** to save it as `sonic_clean_output.wav`.
 
-> 💡 **Tip:** the noise profile is learned from the very beginning of the file, so start your recording with a moment of silence (background noise only) before any speech or music.
+> **Tip:** the noise profile is learned from the very beginning of the file, so start your recording with a moment of silence (background noise only) before any speech or music.
 
 ---
 
-## ⚠️ Limitations
+## Limitations
 
 Spectral subtraction is a classic, simple technique, and it comes with trade-offs:
 
@@ -172,7 +172,7 @@ Spectral subtraction is a classic, simple technique, and it comes with trade-off
 
 ---
 
-## 🗂️ Project structure
+## Project structure
 
 ```
 .
@@ -182,14 +182,14 @@ Spectral subtraction is a classic, simple technique, and it comes with trade-off
 └── README.md
 ```
 
-## 🛠️ Built with
+## Built with
 
 - [Streamlit](https://streamlit.io/) for the web interface
 - [librosa](https://librosa.org/) for audio loading, STFT and inverse STFT
 - [NumPy](https://numpy.org/) for the spectral math
 - [SoundFile](https://python-soundfile.readthedocs.io/) for writing WAV output
 
-## 📚 Concepts from the course
+## Concepts from the course
 
 This project applies these Signals & Systems topics:
 
