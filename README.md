@@ -161,7 +161,7 @@ Spectral subtraction is a classic, simple technique, and it comes with trade-off
 - **Short noise window.** The profile uses the first 15 STFT frames. With librosa's default hop of 512 samples, that is about 0.17 s at 44.1 kHz and about 0.35 s at 22.05 kHz.
 - **Mono output.** `librosa.load` mixes the input down to mono by default.
 
-## 🔭 Ideas for future work
+## Ideas for future work
 
 - [ ] Let the user choose the noise-profile length and the over-subtraction factor with sliders
 - [ ] Plot the spectrogram before and after cleaning
